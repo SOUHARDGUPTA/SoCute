@@ -117,6 +117,6 @@ SoCute is currently under active development. The frontend experience is being b
 
 GitHub: [@SOUHARDGUPTA](https://github.com/SOUHARDGUPTA)
 
----
+-----
 
 ⭐ If you like this project, consider giving the repository a star!
