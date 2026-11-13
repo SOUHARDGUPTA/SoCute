@@ -13,8 +13,9 @@ import {
 
 function Create() {
     const navigate = useNavigate();
-
     const [step, setStep] = useState(1);
+
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const [form, setForm] = useState({
         name: "",
@@ -104,8 +105,11 @@ function Create() {
     };
 
     // Navigate to personalized apology preview
-    const handleSubmit = (e) => {
+    
+const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if (isGenerating) return;
 
   if (
     form.language === "Custom" &&
@@ -115,10 +119,52 @@ function Create() {
     return;
   }
 
-  navigate("/preview", {
-    state: form,
-  });
+  setIsGenerating(true);
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/generate-apology",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to generate your apology."
+      );
+    }
+
+    if (!data.message) {
+      throw new Error("The AI returned an empty apology.");
+    }
+
+    navigate("/preview", {
+      state: {
+        ...form,
+        apologyMessage: data.message,
+      },
+    });
+
+  } catch (error) {
+    console.error("Apology generation error:", error);
+
+    alert(
+      error.message ||
+      "Something went wrong. Please try again."
+    );
+
+  } finally {
+    setIsGenerating(false);
+  }
 };
+
 
     const inputClass =
         "w-full rounded-2xl border border-pink-100 bg-white px-5 py-4 outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition text-gray-700";
@@ -509,13 +555,25 @@ function Create() {
 
                         ) : (
 
-                            <button
-                                type="submit"
-                                className="flex items-center gap-2 px-7 py-3 rounded-full bg-[#e875a3] text-white font-bold hover:bg-[#d85b8c] transition shadow-lg shadow-pink-200"
-                            >
-                                Generate Preview
-                                <Heart size={18} />
-                            </button>
+                            
+<button
+  type="submit"
+  disabled={isGenerating}
+  className="flex items-center gap-2 px-7 py-3 rounded-full bg-[#e875a3] text-white font-bold hover:bg-[#d85b8c] transition shadow-lg shadow-pink-200 disabled:opacity-60 disabled:cursor-not-allowed"
+>
+  {isGenerating ? (
+    <>
+      Generating your apology...
+      <span className="animate-spin">💗</span>
+    </>
+  ) : (
+    <>
+      Generate Preview
+      <Heart size={18} />
+    </>
+  )}
+</button>
+
 
                         )}
 

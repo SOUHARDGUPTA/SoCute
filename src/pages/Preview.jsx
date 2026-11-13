@@ -84,10 +84,11 @@ const selectedLanguage =
     ? form.customLanguage
     : form.language;
 
-const apologyMessage = form.customMessage.trim()
-  ? form.customMessage
-  : apologyTemplates[form.language] ||
-    `I'm truly sorry about ${form.situation}. You mean a lot to me. ❤️`;
+const apologyMessage =
+  form.apologyMessage ||
+  (form.customMessage || "").trim() ||
+  apologyTemplates[form.language] ||
+  `I'm truly sorry about ${form.situation}. You mean a lot to me. ❤️`;
 
   const handleNotYet = () => {
     alert("That's okay! Take your time. ❤️");
